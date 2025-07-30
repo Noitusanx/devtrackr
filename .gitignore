@@ -1,0 +1,28 @@
+# Environment files
+.env
+
+# Database data
+postgres_data/
+redis_data/
+rabbitmq_data/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Go
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# macOS
+.DS_Store
