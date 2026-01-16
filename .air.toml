@@ -1,0 +1,14 @@
+# .air.toml di root repo
+[build]
+cmd = "go build -o ./tmp/devtrackr ./cmd/api"
+bin = "./tmp/devtrackr"
+full_bin = "./tmp/devtrackr"
+include_ext = ["go","mod","sum","env","yaml","toml"]
+exclude_dir = ["vendor","tmp","node_modules",".git"]
+
+[log]
+time = true
+
+[env]
+# percepat build lokal
+CGO_ENABLED = "0"

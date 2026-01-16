@@ -28,12 +28,25 @@ func (r *MilestonePG) FindByProject(ctx context.Context, projectID uuid.UUID) ([
 	var res []model.Milestone
 	err := r.db.WithContext(ctx).
 		Where("project_id = ?", projectID).Order("created_at desc").Order("status != 'done', order_idx asc").Find(&res).Error
+	
+	if err != nil {
+		return nil, err
+	}
+
 	return res, err
 }
 
 func (r *MilestonePG) FindByID(ctx context.Context, id uuid.UUID) (*model.Milestone, error) {
 	var ms model.Milestone
 	err := r.db.WithContext(ctx).First(&ms, "id = ?", id).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound{
+			return nil, nil;
+		}
+		return nil, err
+	}
+
 	return &ms, err
 }
 

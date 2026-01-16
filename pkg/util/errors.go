@@ -1,14 +1,18 @@
 package util
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 )
 
+var ErrInvalidToken = errors.New("invalid or expired token")
+
 
 type AppError struct {
 	Status int
+
 	Message string
 }
 
@@ -53,4 +57,8 @@ func WriteError(c *fiber.Ctx, err error) error {
 	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 		"error": "internal server error",
 	})
+}
+
+func ErrInternalServer(msg string) *AppError {
+	return &AppError{Status: http.StatusInternalServerError, Message: msg}
 }

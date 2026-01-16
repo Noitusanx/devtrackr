@@ -27,6 +27,14 @@ func (r *LogPG) Create(ctx context.Context, log *model.Log) error {
 func (r *LogPG) FindByID(ctx context.Context, id uuid.UUID) (*model.Log, error) {
 	var log model.Log
 	err := r.db.WithContext(ctx).First(&log, "id = ?", id).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound{
+			return nil, nil;
+		}
+		return nil, err;
+	}
+
 	return &log, err
 }
 
@@ -34,6 +42,11 @@ func (r *LogPG) FindByUser(ctx context.Context, userID uuid.UUID) ([]model.Log, 
 	var logs []model.Log
 	err := r.db.WithContext(ctx).
 		Where("user_id = ?", userID).Order("created_at desc").Find(&logs).Error
+
+	if err != nil {
+		return nil, err
+	}
+	
 	return logs, err
 }	
 
@@ -41,6 +54,11 @@ func (r *LogPG) FindByProject(ctx context.Context, projectID uuid.UUID) ([]model
 	var logs []model.Log
 	err := r.db.WithContext(ctx).
 		Where("project_id = ?", projectID).Order("created_at desc").Find(&logs).Error
+
+	if err != nil {
+		return nil, err
+	}
+
 	return logs, err
 }
 

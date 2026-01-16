@@ -23,33 +23,40 @@ func NewLogService(repo repository.LogRepository) *LogService {
 }
 
 
-func (s *LogService) CreateLog(ctx context.Context, projectId, userID uuid.UUID,  text string, durationMinutes int, loggedAt time.Time) error {
+func (s *LogService) CreateLog(ctx context.Context, projectId, userID uuid.UUID, milestoneID *uuid.UUID,  Description string, durationMinutes int, loggedAt time.Time) (*model.Log, error){
+
+
 	if projectId == uuid.Nil {
-		return util.ErrBadRequest("project ID is required")
+		return nil, util.ErrBadRequest("project ID is required")
 	}
 
 	if userID == uuid.Nil {
-		return util.ErrBadRequest("user ID is required")
+		return nil, util.ErrBadRequest("user ID is required")
 	}
 
-	if text == "" {
-		return util.ErrBadRequest("log text is required")
+	if Description == "" {
+		return nil, util.ErrBadRequest("log text is required")
 	}
 	if durationMinutes <= 0 {
-		return util.ErrBadRequest("duration must be greater than zero")
+		return nil, util.ErrBadRequest("duration must be greater than zero")
 	}
 
 	log := &model.Log{
 		ID:              uuid.New(),
 		ProjectID:       projectId,
+		MilestoneID: milestoneID,
 		UserID:          userID,
-		Text:            text,
+		Description:            Description,
 		DurationMinutes: durationMinutes,
 		LoggedAt:        loggedAt,
 		CreatedAt:       time.Now(),
 	}
 
-	return s.repo.Create(ctx, log)
+	if err := s.repo.Create(ctx, log); err != nil{
+		return nil, err
+	}
+
+	return log, nil
 }
 
 
@@ -104,7 +111,7 @@ func (s *LogService) UpdateLog(ctx context.Context, userId uuid.UUID, log *model
 		return util.ErrBadRequest("log ID is required")
 	}
 
-	if log.Text == "" {
+	if log.Description == "" {
 		return util.ErrBadRequest("log text is required")
 	}
 
@@ -112,7 +119,13 @@ func (s *LogService) UpdateLog(ctx context.Context, userId uuid.UUID, log *model
 		return util.ErrBadRequest("duration must be greater than zero")
 	}
 
-	return s.repo.Update(ctx, log)
+	orig.Description = log.Description;
+	orig.DurationMinutes = log.DurationMinutes;
+	orig.LoggedAt = log.LoggedAt;
+	orig.MilestoneID = log.MilestoneID;
+
+
+	return s.repo.Update(ctx, orig)
 }
 
 func (s *LogService) DeleteLog(ctx context.Context, id uuid.UUID) error {

@@ -56,8 +56,6 @@ func (h *AIInsightHandler) CreateInsight(c *fiber.Ctx) error {
 		InsightType: string(insight.Type),
 		Content:     insight.Content,
 		GeneratedAt: insight.GeneratedAt,
-		CreatedAt:   insight.CreatedAt,
-		UpdatedAt:   insight.UpdatedAt,
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(resp)
@@ -92,8 +90,6 @@ func (h *AIInsightHandler) GetInsightByID(c *fiber.Ctx) error {
 		InsightType: string(insight.Type),
 		Content:     insight.Content,
 		GeneratedAt: insight.GeneratedAt,
-		CreatedAt:   insight.CreatedAt,
-		UpdatedAt:   insight.UpdatedAt,
 	}
 
 	return c.JSON(resp)
@@ -126,8 +122,7 @@ func (h *AIInsightHandler) GetInsightsByProject(c *fiber.Ctx) error {
 			InsightType: string(insight.Type),
 			Content:     insight.Content,
 			GeneratedAt: insight.GeneratedAt,
-			CreatedAt:   insight.CreatedAt,
-			UpdatedAt:   insight.UpdatedAt,
+	
 		}
 	}
 
@@ -174,8 +169,6 @@ func (h *AIInsightHandler) UpdateInsight(c *fiber.Ctx) error {
 		InsightType: string(insight.Type),
 		Content:     insight.Content,
 		GeneratedAt: insight.GeneratedAt,
-		CreatedAt:   insight.CreatedAt,
-		UpdatedAt:   insight.UpdatedAt,
 	}
 
 	return c.JSON(resp)
@@ -229,8 +222,6 @@ func (h *AIInsightHandler) GetInsightByProjectAndTypeAndDate(c *fiber.Ctx) error
 		InsightType: string(insight.Type),
 		Content:     insight.Content,
 		GeneratedAt: insight.GeneratedAt,
-		CreatedAt:   insight.CreatedAt,
-		UpdatedAt:   insight.UpdatedAt,
 	}
 
 	return c.JSON(resp)

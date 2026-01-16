@@ -1,0 +1,418 @@
+###############################################################################
+# DevTrackr API Test Collection
+# Extension: REST Client (humao.rest-client) for VS Code
+# Usage: Click "Send Request" di atas setiap request
+###############################################################################
+
+# Variables (edit sesuai environment Anda)
+@baseUrl = http://localhost:8080
+@apiVersion = /api/v1
+
+# Variables untuk store response (akan diisi otomatis)
+@authToken = 
+@userId = 
+@projectId = 
+@milestoneId = 
+@logId = 
+@insightId = 
+@reportId = 
+
+###############################################################################
+# HEALTH CHECK
+###############################################################################
+
+### Health Check
+GET {{baseUrl}}/health
+Content-Type: application/json
+
+###############################################################################
+# AUTHENTICATION & USER MANAGEMENT
+###############################################################################
+
+### 1. Register New User
+# @name register
+POST {{baseUrl}}{{apiVersion}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "SecurePassword123!"
+}
+
+###
+# Extract token from register response
+@authToken = {{register.response.body.token}}
+
+### 2. Register - Test Duplicate Email (Should Fail)
+POST {{baseUrl}}{{apiVersion}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "john.doe@example.com",
+  "password": "AnotherPassword123!"
+}
+
+### 3. Login
+# @name login
+POST {{baseUrl}}{{apiVersion}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "SecurePassword123!"
+}
+
+###
+# Extract token from login response
+@authToken = {{login.response.body.token}}
+
+### 4. Login - Invalid Credentials (Should Fail)
+POST {{baseUrl}}{{apiVersion}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "WrongPassword"
+}
+
+### 5. Get Current User (Protected)
+GET {{baseUrl}}{{apiVersion}}/users/me
+Authorization: Bearer {{authToken}}
+
+### 6. Get Current User - Without Token (Should Fail)
+GET {{baseUrl}}{{apiVersion}}/users/me
+
+### 7. Update Profile
+PUT {{baseUrl}}{{apiVersion}}/users/me
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "John Doe Updated"
+}
+
+### 8. Delete Account (DANGER - Use with caution!)
+# DELETE {{baseUrl}}{{apiVersion}}/users/me
+# Authorization: Bearer {{authToken}}
+
+###############################################################################
+# PROJECTS
+###############################################################################
+
+### 9. Create Project
+# @name createProject
+POST {{baseUrl}}{{apiVersion}}/projects
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Learn Data Structures",
+  "description": "Complete Leetcode DSA 150 problems",
+  "deadline": "2025-12-31T23:59:59Z"
+}
+
+###
+@projectId = {{createProject.response.body.id}}
+
+### 10. Get All User Projects
+GET {{baseUrl}}{{apiVersion}}/projects
+Authorization: Bearer {{authToken}}
+
+### 11. Get Project by ID
+GET {{baseUrl}}{{apiVersion}}/projects/{{projectId}}
+Authorization: Bearer {{authToken}}
+
+### 12. Update Project
+PUT {{baseUrl}}{{apiVersion}}/projects/{{projectId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Learn Data Structures (Updated)",
+  "description": "Complete Leetcode DSA 150 problems - Focus on Arrays and Strings",
+  "deadline": "2025-12-31T23:59:59Z"
+}
+
+### 13. Delete Project (Use with caution!)
+# DELETE {{baseUrl}}{{apiVersion}}/projects/{{projectId}}
+# Authorization: Bearer {{authToken}}
+
+###############################################################################
+# MILESTONES
+###############################################################################
+
+### 14. Create Milestone
+# @name createMilestone
+POST {{baseUrl}}{{apiVersion}}/projects/{{projectId}}/milestones
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "project_id": "{{projectId}}",
+  "name": "Arrays and Strings",
+  "order_index": 1
+}
+
+###
+@milestoneId = {{createMilestone.response.body.id}}
+
+### 15. Create Another Milestone
+POST {{baseUrl}}{{apiVersion}}/projects/{{projectId}}/milestones
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "project_id": "{{projectId}}",
+  "name": "Linked Lists",
+  "description": "Complete all linked list problems",
+  "order_index": 2
+}
+
+### 16. Get Milestones by Project
+GET {{baseUrl}}{{apiVersion}}/projects/{{projectId}}/milestones
+Authorization: Bearer {{authToken}}
+
+### 17. Get Milestone by ID
+GET {{baseUrl}}{{apiVersion}}/milestones/{{milestoneId}}
+Authorization: Bearer {{authToken}}
+
+### 18. Update Milestone
+PUT {{baseUrl}}{{apiVersion}}/milestones/{{milestoneId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Arrays and Strings (Updated)",
+  "description": "Master array and string manipulation - 50 problems completed",
+  "is_completed": false
+}
+
+### 19. Complete Milestone
+PATCH {{baseUrl}}{{apiVersion}}/milestones/{{milestoneId}}/complete
+Authorization: Bearer {{authToken}}
+
+### 20. Delete Milestone
+# DELETE {{baseUrl}}{{apiVersion}}/milestones/{{milestoneId}}
+# Authorization: Bearer {{authToken}}
+
+###############################################################################
+# ACTIVITY LOGS
+###############################################################################
+
+### 21. Create Activity Log
+# @name createLog
+POST {{baseUrl}}{{apiVersion}}/projects/{{projectId}}/logs
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{milestoneId}}",
+  "description": "Completed Two Sum, Three Sum, and Container with Most Water problems",
+  "duration_minutes": 2,
+  "logged_at": "2025-01-02T15:04:05+07:00"
+}
+
+###
+@logId = {{createLog.response.body.id}}
+
+### 22. Create Another Log
+POST {{baseUrl}}{{apiVersion}}/logs
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+   "project_id": "{{projectId}}",
+  "milestone_id": "{{milestoneId}}",
+  "description": "Practiced string manipulation and palindrome problems",
+  "duration_minutes": 5,
+  "logged_at": "2025-01-02T15:04:05+07:00"
+}
+
+### 23. Get Logs by Project
+GET {{baseUrl}}{{apiVersion}}/logs/project/{{projectId}}
+Authorization: Bearer {{authToken}}
+
+### 24. Get Log by ID
+GET {{baseUrl}}{{apiVersion}}/logs/{{logId}}
+Authorization: Bearer {{authToken}}
+
+### 25. Update Log
+PUT {{baseUrl}}{{apiVersion}}/logs/{{logId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "description": "Completed Two Susssm, Three Sum, Container with Most Water, and Valid Parentheses",
+  "duration_minutes": 8,
+  "logged_at": "2025-01-02T15:04:05+09:00"
+}
+
+### 26. Delete Log
+DELETE {{baseUrl}}{{apiVersion}}/logs/{{logId}}
+Authorization: Bearer {{authToken}}
+
+###############################################################################
+# AI INSIGHTS
+###############################################################################
+
+### 27. Create AI Insight (Manual)
+# @name createInsight
+POST {{baseUrl}}{{apiVersion}}/insights
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "project_id": "{{projectId}}",
+  "insight_type": "progress",
+  "content": "Kamu sudah menyelesaikan 40% dalam separuh waktu yang tersedia — sejauh ini progresmu cukup baik. Namun, agar tidak keteteran di akhir, disarankan meningkatkan intensitas belajar menjadi 1 jam per 2 hari."
+}
+
+###
+@insightId = {{createInsight.response.body.id}}
+
+### 28. Get Insights by Project
+GET {{baseUrl}}{{apiVersion}}/insights/project/{{projectId}}
+Authorization: Bearer {{authToken}}
+
+### 29. Get Insight by ID
+GET {{baseUrl}}{{apiVersion}}/insights/{{insightId}}
+Authorization: Bearer {{authToken}}
+
+### 30. Get Insight by Project, Type, and Date
+GET {{baseUrl}}{{apiVersion}}/insights/project/{{projectId}}/progress?date=2024-11-09T00:00:00Z
+Authorization: Bearer {{authToken}}
+
+### 31. Update Insight
+PUT {{baseUrl}}{{apiVersion}}/insights/{{insightId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "id": "{{insightId}}",
+  "project_id": "{{projectId}}",
+  "insight_type": "progress",
+  "content": "Progress update: Kamu konsisten dan on-track! Pertahankan momentum ini untuk menyelesaikan project tepat waktu."
+}
+
+### 32. Delete Insight
+# DELETE {{baseUrl}}{{apiVersion}}/insights/{{insightId}}
+# Authorization: Bearer {{authToken}}
+
+###############################################################################
+# REPORTS
+###############################################################################
+
+### 33. Generate Report
+# @name generateReport
+POST {{baseUrl}}{{apiVersion}}/reports/project/{{projectId}}/generate
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "report_type": "weekly"
+}
+
+###
+@reportId = {{generateReport.response.body.id}}
+
+### 34. Get Report by ID
+GET {{baseUrl}}{{apiVersion}}/reports/{{reportId}}
+Authorization: Bearer {{authToken}}
+
+### 35. Download Report
+GET {{baseUrl}}{{apiVersion}}/reports/{{reportId}}/download
+Authorization: Bearer {{authToken}}
+
+### 36. Get All Reports for Project
+GET {{baseUrl}}{{apiVersion}}/reports/project/{{projectId}}
+Authorization: Bearer {{authToken}}
+
+### 37. Delete Report
+# DELETE {{baseUrl}}{{apiVersion}}/reports/{{reportId}}
+# Authorization: Bearer {{authToken}}
+
+###############################################################################
+# DASHBOARD (TODO - Implement)
+###############################################################################
+
+### 38. Get User Dashboard
+GET {{baseUrl}}{{apiVersion}}/dashboard
+Authorization: Bearer {{authToken}}
+
+###############################################################################
+# ERROR CASES - Testing Error Handling
+###############################################################################
+
+### 39. Invalid JWT Token
+GET {{baseUrl}}{{apiVersion}}/projects
+Authorization: Bearer invalid-token-here
+
+### 40. Expired/Malformed Token
+GET {{baseUrl}}{{apiVersion}}/projects
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid
+
+### 41. Missing Required Fields
+POST {{baseUrl}}{{apiVersion}}/projects
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "description": "Missing title field"
+}
+
+### 42. Invalid UUID Format
+GET {{baseUrl}}{{apiVersion}}/projects/invalid-uuid
+Authorization: Bearer {{authToken}}
+
+### 43. Non-existent Resource
+GET {{baseUrl}}{{apiVersion}}/projects/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+
+###############################################################################
+# CLEANUP (Run these at the end to clean test data)
+###############################################################################
+
+### Cleanup: Delete all test data
+# Uncomment and run these in order if you want to clean up
+
+# DELETE {{baseUrl}}{{apiVersion}}/logs/{{logId}}
+# Authorization: Bearer {{authToken}}
+
+# DELETE {{baseUrl}}{{apiVersion}}/insights/{{insightId}}
+# Authorization: Bearer {{authToken}}
+
+# DELETE {{baseUrl}}{{apiVersion}}/reports/{{reportId}}
+# Authorization: Bearer {{authToken}}
+
+# DELETE {{baseUrl}}{{apiVersion}}/milestones/{{milestoneId}}
+# Authorization: Bearer {{authToken}}
+
+# DELETE {{baseUrl}}{{apiVersion}}/projects/{{projectId}}
+# Authorization: Bearer {{authToken}}
+
+# DELETE {{baseUrl}}{{apiVersion}}/users/me
+# Authorization: Bearer {{authToken}}
+
+###############################################################################
+# NOTES:
+# 1. Variables (@authToken, @projectId, dll) akan ter-populate otomatis
+#    setelah Anda run request yang di-mark dengan # @name
+# 
+# 2. Untuk copy token manual:
+#    - Jalankan Register/Login
+#    - Copy token dari response
+#    - Paste ke @authToken di atas
+#
+# 3. Request yang di-comment (#) adalah destructive operations
+#    Uncomment dengan hati-hati!
+#
+# 4. Urutan testing yang disarankan:
+#    - Auth (1-8)
+#    - Projects (9-13)
+#    - Milestones (14-20)
+#    - Logs (21-26)
+#    - Insights (27-32)
+#    - Reports (33-37)
+###############################################################################

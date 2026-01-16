@@ -18,3 +18,9 @@ func FromModelUser(user *model.User) User {
 	}
 }
 
+
+type UpdateUserRequest struct{
+	ID string `json:"id"`
+	Name string `json:"name"`
+}
+

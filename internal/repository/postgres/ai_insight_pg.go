@@ -27,6 +27,15 @@ func (r *AIInsightPG) Create(ctx context.Context, insight *model.AIInsight) erro
 func (r *AIInsightPG) FindByID(ctx context.Context, id uuid.UUID) (*model.AIInsight, error) {
 	var insight model.AIInsight
 	err := r.db.WithContext(ctx).First(&insight, "id = ?", id).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound{
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
 	return &insight, err
 }
 
@@ -34,6 +43,11 @@ func (r *AIInsightPG) FindByProject(ctx context.Context, projectID uuid.UUID) ([
 	var insights []model.AIInsight
 	err := r.db.WithContext(ctx).
 		Where("project_id = ?", projectID).Order("created_at desc").Find(&insights).Error
+
+	if err != nil {
+		return nil, err
+	}
+
 	return insights, err
 }
 
@@ -45,6 +59,10 @@ func (r *AIInsightPG) FindByProjectAndTypeAndDate(ctx context.Context, projectID
 		First(&insight).Error
 
 		if err != nil {
+			if err == gorm.ErrRecordNotFound{
+				return nil, nil
+			}
+
 			return nil, err
 		}
 	return &insight, err

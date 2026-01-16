@@ -25,6 +25,15 @@ func (r *ReportPG) Create(ctx context.Context, report *model.Report) error {
 func (r *ReportPG) FindByID(ctx context.Context, id uuid.UUID) (*model.Report, error) {
 	var report model.Report
 	err := r.db.WithContext(ctx).First(&report, "id = ?", id).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound{
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
 	return &report, err
 }
 
@@ -32,6 +41,11 @@ func (r *ReportPG) FindByProject(ctx context.Context, projectID uuid.UUID) ([]mo
 	var reports []model.Report
 	err := r.db.WithContext(ctx).
 		Where("project_id = ?", projectID).Order("generated_at desc").Find(&reports).Error
+
+	if err != nil {
+		return nil, err
+	}
+	
 	return reports, err
 }
 

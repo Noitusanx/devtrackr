@@ -31,7 +31,7 @@ func (h *MilestoneHandler) CreateMilestone(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
 	}
-	projectID := c.Params("projectID")
+	projectID := c.Params("id")
 	if projectID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "project ID is required"})
 	}
@@ -49,8 +49,6 @@ func (h *MilestoneHandler) CreateMilestone(c *fiber.Ctx) error {
 	defer cancel()
 
 	
-
-
 	projectIDParsed, err := uuid.Parse(projectID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid project ID format"})
@@ -70,6 +68,7 @@ func (h *MilestoneHandler) CreateMilestone(c *fiber.Ctx) error {
 
 	resp := dto.MilestoneResponse{
 		ID:          milestone.ID.String(),
+		ProjectID: projectID,
 		Name:        milestone.Name,
 		OrderIdx:    milestone.OrderIdx,
 		Status:      milestone.Status,
@@ -83,7 +82,7 @@ func (h *MilestoneHandler) CreateMilestone(c *fiber.Ctx) error {
 }
 
 func(h *MilestoneHandler) GetMilestonesByProject(c *fiber.Ctx) error {
-	projectID := c.Params("projectID")
+	projectID := c.Params("id")
 	if projectID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "project ID is required"})
 	}
@@ -107,6 +106,7 @@ func(h *MilestoneHandler) GetMilestonesByProject(c *fiber.Ctx) error {
 	for _, m := range milestones {
 		resp = append(resp, dto.MilestoneResponse{
 			ID:          m.ID.String(),
+			ProjectID: projectID,
 			Name:        m.Name,
 			OrderIdx:    m.OrderIdx,
 			Status:      m.Status,
@@ -140,6 +140,7 @@ func (h *MilestoneHandler) GetMilestoneByID(c *fiber.Ctx) error {
 
 	resp := dto.MilestoneResponse{
 		ID:          milestone.ID.String(),
+		ProjectID: milestone.ProjectID.String(),
 		Name:        milestone.Name,
 		OrderIdx:    milestone.OrderIdx,
 		Status:      milestone.Status,
@@ -222,6 +223,7 @@ func (h *MilestoneHandler) UpdateMilestone(c *fiber.Ctx) error {
 
 	resp := dto.MilestoneResponse{
 		ID:          milestone.ID.String(),
+		ProjectID: milestone.ProjectID.String(),
 		Name:        milestone.Name,
 		OrderIdx:    milestone.OrderIdx,
 		Status:      milestone.Status,

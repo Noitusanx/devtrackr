@@ -22,16 +22,34 @@ func (r *UserPG) Create(ctx context.Context, user *model.User) error {
 	return r.db.WithContext(ctx).Create(user).Error
 }
 
-func (r *UserPG) FindByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
-	var user model.User
-	err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error
-	return &user, err
+// user_pg.go - FIXED
+func (r *UserPG) FindByEmail(ctx context.Context, email string) (*model.User, error) {
+    var user model.User
+    err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error
+    
+    // Handle record not found
+    if err != nil {
+        if err == gorm.ErrRecordNotFound {
+            return nil, nil  
+        }
+        return nil, err  
+    }
+    
+    return &user, nil  
 }
 
-func (r *UserPG) FindByEmail(ctx context.Context, email string) (*model.User, error) {
-	var user model.User
-	err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error
-	return &user, err
+func (r *UserPG) FindByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
+    var user model.User
+    err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error
+    
+    if err != nil {
+        if err == gorm.ErrRecordNotFound {
+            return nil, nil
+        }
+        return nil, err
+    }
+    
+    return &user, nil
 }
 
 func (r *UserPG) Update(ctx context.Context, user *model.User) error {

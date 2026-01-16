@@ -16,4 +16,6 @@ type AIInsightRepository interface {
 	FindByProjectAndTypeAndDate(ctx context.Context, projectID uuid.UUID, insightType model.InsightType, date time.Time) (*model.AIInsight, error)
 	Update(ctx context.Context, insight *model.AIInsight) error
 	Delete(ctx context.Context, id uuid.UUID) error
+
+
 }

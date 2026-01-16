@@ -33,6 +33,14 @@ func (r *ProjectPG) FindByUser(ctx context.Context, userID uuid.UUID) ([]model.P
 func (r *ProjectPG) FindByID(ctx context.Context, id uuid.UUID) (*model.Project, error) {
 	var proj model.Project
 	err := r.db.WithContext(ctx).First(&proj, "id = ?", id).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound{
+			return nil, nil
+		}
+		return nil, err
+	}
+
 	return &proj, err
 }
 
